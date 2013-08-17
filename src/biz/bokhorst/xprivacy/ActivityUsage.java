@@ -9,10 +9,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-import android.app.Activity;
+import android.support.v7.app.ActionBarActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
@@ -29,7 +30,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ActivityUsage extends Activity {
+public class ActivityUsage extends ActionBarActivity {
 	private int mThemeId;
 	private boolean mAll = true;
 	private int mUid;
@@ -67,7 +68,11 @@ public class ActivityUsage extends Activity {
 
 		// Start task to get usage data
 		UsageTask usageTask = new UsageTask();
-		usageTask.executeOnExecutor(mExecutor, (Object) null);
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+			usageTask.executeOnExecutor(mExecutor, (Object) null);
+		} else {
+			usageTask.execute((Object) null);
+		}
 
 		// Listen for clicks
 		ListView lvUsage = (ListView) findViewById(R.id.lvUsage);
@@ -88,7 +93,7 @@ public class ActivityUsage extends Activity {
 		});
 
 		// Up navigation
-		getActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 	}
 
 	@Override
@@ -123,7 +128,11 @@ public class ActivityUsage extends Activity {
 			return true;
 		case R.id.menu_refresh:
 			UsageTask usageTask = new UsageTask();
-			usageTask.executeOnExecutor(mExecutor, (Object) null);
+			if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+				usageTask.executeOnExecutor(mExecutor, (Object) null);
+			} else {
+				usageTask.execute((Object) null);
+			}
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -204,7 +213,9 @@ public class ActivityUsage extends Activity {
 				if (results.values == null)
 					notifyDataSetInvalidated();
 				else {
-					addAll((ArrayList<PrivacyManager.UsageData>) results.values);
+					for (PrivacyManager.UsageData usage : (ArrayList<PrivacyManager.UsageData>) results.values) {
+						add(usage);
+					}
 					notifyDataSetChanged();
 				}
 			}

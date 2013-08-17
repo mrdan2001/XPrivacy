@@ -57,7 +57,7 @@
         android:orientation="horizontal" >
 
         <RelativeLayout
-            android:layout_width="?android:attr/listPreferredItemHeightSmall"
+            android:layout_width="?attr/listPreferredItemHeightSmall"
             android:layout_height="24dip"
             android:layout_gravity="center_vertical"
             android:paddingLeft="6dip" >

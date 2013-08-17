@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings.Secure;
@@ -65,13 +66,21 @@ public class ActivityShare extends Activity {
 			// Import
 			if (getIntent().getAction().equals("biz.bokhorst.xprivacy.action.IMPORT")) {
 				ImportTask importTask = new ImportTask();
-				importTask.executeOnExecutor(mExecutor, new File(fileName));
+				if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+					importTask.executeOnExecutor(mExecutor, new File(fileName));
+				} else {
+					importTask.execute(new File(fileName));
+				}
 			}
 
 			// Export
 			if (getIntent().getAction().equals("biz.bokhorst.xprivacy.action.EXPORT")) {
 				ExportTask exportTask = new ExportTask();
-				exportTask.executeOnExecutor(mExecutor, new File(fileName));
+				if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+					exportTask.executeOnExecutor(mExecutor, new File(fileName));
+				} else {
+					exportTask.execute(new File(fileName));
+				}
 			}
 		}
 	}

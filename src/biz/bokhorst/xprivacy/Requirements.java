@@ -20,7 +20,8 @@ public class Requirements {
 
 	public static void check(final Context context) {
 		// Check Android version
-		if (Build.VERSION.SDK_INT != Build.VERSION_CODES.ICE_CREAM_SANDWICH
+		if (Build.VERSION.SDK_INT != Build.VERSION_CODES.GINGERBREAD_MR1
+				&& Build.VERSION.SDK_INT != Build.VERSION_CODES.ICE_CREAM_SANDWICH
 				&& Build.VERSION.SDK_INT != Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1
 				&& Build.VERSION.SDK_INT != Build.VERSION_CODES.JELLY_BEAN
 				&& Build.VERSION.SDK_INT != Build.VERSION_CODES.JELLY_BEAN_MR1
@@ -138,7 +139,12 @@ public class Requirements {
 
 		// Check package manager service
 		try {
-			Class<?> clazz = Class.forName("com.android.server.pm.PackageManagerService");
+			Class<?> clazz;
+			if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+				clazz = Class.forName("com.android.server.pm.PackageManagerService");
+			} else {
+				clazz = Class.forName("com.android.server.PackageManagerService");
+			}
 			try {
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
 					clazz.getDeclaredMethod("getPackageUid", String.class, int.class);
