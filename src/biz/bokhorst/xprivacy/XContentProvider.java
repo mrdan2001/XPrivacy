@@ -11,8 +11,8 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.util.Log;
-
 import de.robv.android.xposed.XC_MethodHook.MethodHookParam;
 
 public class XContentProvider extends XHook {
@@ -191,6 +191,11 @@ public class XContentProvider extends XHook {
 							if (!copy && rawid >= 0)
 								copy = PrivacyManager.getSettingBool(this, null,
 										String.format("RawContact.%d.%d", Binder.getCallingUid(), rawid), false, true);
+
+							// cursor.getType since api-11
+							if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.GINGERBREAD_MR1) {
+								copy = false;
+							}
 
 							// Conditionally copy row
 							if (copy)

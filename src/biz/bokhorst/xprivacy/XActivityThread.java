@@ -83,11 +83,14 @@ public class XActivityThread extends XHook {
 
 		listHook.add(new XActivityThread("handleReceiver", PrivacyManager.cSystem, Intent.ACTION_PACKAGE_CHANGED));
 		listHook.add(new XActivityThread("handleReceiver", PrivacyManager.cSystem, Intent.ACTION_PACKAGE_DATA_CLEARED));
-		listHook.add(new XActivityThread("handleReceiver", PrivacyManager.cSystem, Intent.ACTION_PACKAGE_FIRST_LAUNCH));
-		listHook.add(new XActivityThread("handleReceiver", PrivacyManager.cSystem, Intent.ACTION_PACKAGE_FULLY_REMOVED));
 		listHook.add(new XActivityThread("handleReceiver", PrivacyManager.cSystem,
-				Intent.ACTION_PACKAGE_NEEDS_VERIFICATION));
-		listHook.add(new XActivityThread("handleReceiver", PrivacyManager.cSystem, Intent.ACTION_PACKAGE_VERIFIED));
+				Intent.ACTION_PACKAGE_FIRST_LAUNCH, Build.VERSION_CODES.ICE_CREAM_SANDWICH));
+		listHook.add(new XActivityThread("handleReceiver", PrivacyManager.cSystem,
+				Intent.ACTION_PACKAGE_FULLY_REMOVED, Build.VERSION_CODES.ICE_CREAM_SANDWICH));
+		listHook.add(new XActivityThread("handleReceiver", PrivacyManager.cSystem,
+				Intent.ACTION_PACKAGE_NEEDS_VERIFICATION, Build.VERSION_CODES.ICE_CREAM_SANDWICH));
+		listHook.add(new XActivityThread("handleReceiver", PrivacyManager.cSystem,
+				Intent.ACTION_PACKAGE_VERIFIED, Build.VERSION_CODES.JELLY_BEAN));
 
 		listHook.add(new XActivityThread("handleReceiver", PrivacyManager.cSystem,
 				Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE));
@@ -195,6 +198,10 @@ public class XActivityThread extends XHook {
 			unschedule.invoke(param.thisObject);
 		} catch (Throwable ex) {
 			Util.bug(this, ex);
+		}
+
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			return;
 		}
 
 		// data.finish

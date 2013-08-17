@@ -28,7 +28,7 @@ import org.json.JSONObject;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.app.Activity;
+import android.support.v7.app.ActionBarActivity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Notification;
@@ -68,7 +68,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ActivityApp extends Activity {
+public class ActivityApp extends ActionBarActivity {
 
 	private int mThemeId;
 	private boolean mNotified;
@@ -200,7 +200,7 @@ public class ActivityApp extends Activity {
 		}
 
 		// Up navigation
-		getActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 	}
 
 	@Override
@@ -353,7 +353,11 @@ public class ActivityApp extends Activity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				SubmitTask submitTask = new SubmitTask();
-				submitTask.executeOnExecutor(mExecutor, mAppInfo);
+				if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+					submitTask.executeOnExecutor(mExecutor, mAppInfo);
+				} else {
+					submitTask.execute(mAppInfo);
+				}
 			}
 		});
 		alertDialogBuilder.setNegativeButton(getString(android.R.string.cancel), new DialogInterface.OnClickListener() {
@@ -373,13 +377,21 @@ public class ActivityApp extends Activity {
 		} else {
 			// Initiate fetch
 			FetchTask fetchTask = new FetchTask();
-			fetchTask.executeOnExecutor(mExecutor, mAppInfo);
+			if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+				fetchTask.executeOnExecutor(mExecutor, mAppInfo);
+			} else {
+				fetchTask.execute(mAppInfo);
+			}
 		}
 	}
 
 	private void optionAccounts() {
 		AccountsTask accountsTask = new AccountsTask();
-		accountsTask.executeOnExecutor(mExecutor, (Object) null);
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+			accountsTask.executeOnExecutor(mExecutor, (Object) null);
+		} else {
+			accountsTask.execute((Object) null);
+		}
 	}
 
 	private void optionLaunch() {
@@ -401,7 +413,11 @@ public class ActivityApp extends Activity {
 
 	private void optionContacts() {
 		ContactsTask contactsTask = new ContactsTask();
-		contactsTask.executeOnExecutor(mExecutor, (Object) null);
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+			contactsTask.executeOnExecutor(mExecutor, (Object) null);
+		} else {
+			contactsTask.execute((Object) null);
+		}
 	}
 
 	// Tasks
@@ -923,7 +939,11 @@ public class ActivityApp extends Activity {
 			holder.ctvRestriction.setClickable(false);
 
 			// Async update
-			new GroupHolderTask(groupPosition, holder, restrictionName).executeOnExecutor(mExecutor, (Object) null);
+			if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+				new GroupHolderTask(groupPosition, holder, restrictionName).executeOnExecutor(mExecutor, (Object) null);
+			} else {
+				new GroupHolderTask(groupPosition, holder, restrictionName).execute((Object) null);
+			}
 
 			return convertView;
 		}
@@ -1073,8 +1093,12 @@ public class ActivityApp extends Activity {
 			holder.ctvMethodName.setClickable(false);
 
 			// Async update
-			new ChildHolderTask(groupPosition, childPosition, holder, restrictionName).executeOnExecutor(mExecutor,
-					(Object) null);
+			if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+				new ChildHolderTask(groupPosition, childPosition, holder, restrictionName).executeOnExecutor(mExecutor,
+						(Object) null);
+			} else {
+				new ChildHolderTask(groupPosition, childPosition, holder, restrictionName).execute((Object) null);
+			}
 
 			return convertView;
 		}

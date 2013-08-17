@@ -21,7 +21,7 @@ public abstract class XHook {
 		mRestrictionName = restrictionName;
 		mMethodName = methodName;
 		mSpecifier = specifier;
-		mSdk = Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+		mSdk = Build.VERSION_CODES.GINGERBREAD_MR1;
 
 		if (restrictionName != null)
 			PrivacyManager.registerMethod(restrictionName, getSpecifier(), mSdk);

@@ -1,6 +1,7 @@
 package biz.bokhorst.xprivacy;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.text.MessageFormat;
@@ -43,6 +44,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -105,6 +107,7 @@ public class ActivityMain extends Activity implements OnItemSelectedListener, Co
 	}
 
 	private BroadcastReceiver mPackageChangeReceiver = new BroadcastReceiver() {
+		@SuppressLint("Override")
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			ActivityMain.this.recreate();
@@ -113,6 +116,9 @@ public class ActivityMain extends Activity implements OnItemSelectedListener, Co
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		if (getIntent().hasExtra("bundle") && savedInstanceState == null) {
+			savedInstanceState = getIntent().getExtras().getBundle("bundle");
+		}
 		super.onCreate(savedInstanceState);
 		// Salt should be the same when exporting/importing
 		String salt = PrivacyManager.getSetting(null, this, PrivacyManager.cSettingSalt, null, false);
@@ -141,7 +147,9 @@ public class ActivityMain extends Activity implements OnItemSelectedListener, Co
 
 		// Build spinner adapter
 		SpinnerAdapter spAdapter = new SpinnerAdapter(this, android.R.layout.simple_spinner_item);
-		spAdapter.addAll(listLocalizedRestriction);
+		for (String item: listLocalizedRestriction) {
+		    spAdapter.add(item);
+		}
 
 		// Handle info
 		ImageView imgInfo = (ImageView) findViewById(R.id.imgInfo);
@@ -245,7 +253,11 @@ public class ActivityMain extends Activity implements OnItemSelectedListener, Co
 
 		// Start task to get app list
 		AppListTask appListTask = new AppListTask();
-		appListTask.executeOnExecutor(mExecutor, (Object) null);
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+			appListTask.executeOnExecutor(mExecutor, (Object) null);
+		} else {
+			appListTask.execute((Object) null);
+		}
 
 		// Check environment
 		Requirements.check(this);
@@ -264,6 +276,20 @@ public class ActivityMain extends Activity implements OnItemSelectedListener, Co
 		if (PrivacyManager.getSettingBool(null, this, PrivacyManager.cSettingFirstRun, true, false)) {
 			optionAbout();
 			PrivacyManager.setSetting(null, this, PrivacyManager.cSettingFirstRun, Boolean.FALSE.toString());
+		}
+	}
+
+	@Override
+	public void recreate() {
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+			super.recreate();
+		} else {
+			Bundle bundle = new Bundle();
+			onSaveInstanceState(bundle);
+			Intent intent = new Intent(this, ActivityMain.class);
+			intent.putExtra("bundle", bundle);
+			startActivity(getIntent());
+			finish();
 		}
 	}
 
@@ -354,6 +380,15 @@ public class ActivityMain extends Activity implements OnItemSelectedListener, Co
 				} catch (Throwable ex) {
 					Util.bug(null, ex);
 				}
+		}
+	}
+
+	@Override
+	public void invalidateOptionsMenu() {
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+			super.invalidateOptionsMenu();
+		} else {
+			ActivityCompat.invalidateOptionsMenu(ActivityMain.this);
 		}
 	}
 
@@ -696,7 +731,11 @@ public class ActivityMain extends Activity implements OnItemSelectedListener, Co
 				// Refresh if needed
 				if (fPermission != cbFPermission.isChecked() || fSystem != cbFSystem.isChecked()) {
 					AppListTask appListTask = new AppListTask();
-					appListTask.executeOnExecutor(mExecutor, (Object) null);
+					if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+						appListTask.executeOnExecutor(mExecutor, (Object) null);
+					} else {
+						appListTask.execute((Object) null);
+					}
 				}
 
 				// Done
@@ -742,7 +781,11 @@ public class ActivityMain extends Activity implements OnItemSelectedListener, Co
 	}
 
 	private void optionCheckUpdate() {
-		new UpdateTask().executeOnExecutor(mExecutor, "http://goo.im/json2&path=/devs/M66B/xprivacy");
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+			new UpdateTask().executeOnExecutor(mExecutor, "http://goo.im/json2&path=/devs/M66B/xprivacy");
+		} else {
+			new UpdateTask().execute("http://goo.im/json2&path=/devs/M66B/xprivacy");
+		}
 	}
 
 	private void optionReportIssue() {
@@ -1203,7 +1246,9 @@ public class ActivityMain extends Activity implements OnItemSelectedListener, Co
 				if (results.values == null)
 					notifyDataSetInvalidated();
 				else {
-					addAll((ArrayList<ApplicationInfoEx>) results.values);
+					for (ApplicationInfoEx info : (ArrayList<ApplicationInfoEx>) results.values) {
+						add(info);
+					}
 					notifyDataSetChanged();
 				}
 			}
@@ -1380,7 +1425,11 @@ public class ActivityMain extends Activity implements OnItemSelectedListener, Co
 			holder.ctvApp.setClickable(false);
 
 			// Async update
-			new HolderTask(position, holder, xAppInfo).executeOnExecutor(mExecutor, (Object) null);
+			if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+				new HolderTask(position, holder, xAppInfo).executeOnExecutor(mExecutor, (Object) null);
+			} else {
+				new HolderTask(position, holder, xAppInfo).execute((Object) null);
+			}
 
 			return convertView;
 		}

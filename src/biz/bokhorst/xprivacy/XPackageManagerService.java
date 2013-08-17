@@ -20,7 +20,11 @@ public class XPackageManagerService extends XHook {
 	}
 
 	public String getClassName() {
-		return "com.android.server.pm.PackageManagerService";
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+			return "com.android.server.pm.PackageManagerService";
+		} else {
+			return "com.android.server.PackageManagerService";
+		}
 	}
 
 	// public int[] getPackageGids(String packageName)
