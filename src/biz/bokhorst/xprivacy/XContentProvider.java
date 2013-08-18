@@ -7,6 +7,7 @@ import java.util.List;
 import android.annotation.SuppressLint;
 import android.content.ContentProvider;
 import android.content.Context;
+import android.database.AbstractWindowedCursor;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
@@ -192,17 +193,29 @@ public class XContentProvider extends XHook {
 								copy = PrivacyManager.getSettingBool(this, null,
 										String.format("RawContact.%d.%d", Binder.getCallingUid(), rawid), false, true);
 
-							// cursor.getType since api-11
-							if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.GINGERBREAD_MR1) {
-								copy = false;
-							}
-
 							// Conditionally copy row
 							if (copy)
 								try {
 									Object[] columns = new Object[cursor.getColumnCount()];
-									for (int i = 0; i < cursor.getColumnCount(); i++)
-										switch (cursor.getType(i)) {
+									for (int i = 0; i < cursor.getColumnCount(); i++) {
+										int type = -1;
+										if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+											type = cursor.getType(i);
+										} else if (cursor.isNull(i)) {
+											type = Cursor.FIELD_TYPE_NULL;
+										// SQLiteCursor is subclass of AbstractWindowedCursor
+										} else if (cursor instanceof AbstractWindowedCursor) {
+											if (((AbstractWindowedCursor) cursor).isLong(i)) {
+												type = Cursor.FIELD_TYPE_INTEGER;
+											} else if (((AbstractWindowedCursor) cursor).isFloat(i)) {
+												type = Cursor.FIELD_TYPE_FLOAT;
+											} else if (((AbstractWindowedCursor) cursor).isString(i)) {
+												type = Cursor.FIELD_TYPE_STRING;
+											} else if (((AbstractWindowedCursor) cursor).isBlob(i)) {
+												type = Cursor.FIELD_TYPE_BLOB;
+											}
+										}
+										switch (type) {
 										case Cursor.FIELD_TYPE_NULL:
 											columns[i] = null;
 											break;
@@ -221,6 +234,7 @@ public class XContentProvider extends XHook {
 										default:
 											Util.log(this, Log.WARN, "Unknown cursor data type=" + cursor.getType(i));
 										}
+									}
 									result.addRow(columns);
 								} catch (Throwable ex) {
 									Util.bug(this, ex);
