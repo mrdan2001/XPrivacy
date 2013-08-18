@@ -80,7 +80,8 @@ public class XContentProvider extends XHook {
 					"com.android.providers.calendar.CalendarProvider2"));
 
 		// Contacts provider
-		else if (packageName.equals("com.android.providers.contacts")) {
+		else if (packageName.equals("com.android.providers.contacts")
+				|| packageName.equals("com.motorola.blur.providers.contacts")) {
 			String[] uris = new String[] { "contacts/contacts", "contacts/data", "contacts/raw_contacts",
 					"contacts/phone_lookup", "contacts/profile" };
 			for (String uri : uris)
@@ -89,6 +90,10 @@ public class XContentProvider extends XHook {
 
 			listHook.add(new XContentProvider(PrivacyManager.cPhone, "CallLogProvider",
 					"com.android.providers.contacts.CallLogProvider"));
+
+			listHook.add(new XContentProvider(PrivacyManager.cPhone, "BlurCallLogProvider",
+					"com.motorola.blur.providers.contacts.BlurCallLogProvider"));
+
 			listHook.add(new XContentProvider(PrivacyManager.cMessages, "VoicemailContentProvider",
 					"com.android.providers.contacts.VoicemailContentProvider"));
 		}
@@ -232,7 +237,7 @@ public class XContentProvider extends XHook {
 											columns[i] = cursor.getBlob(i);
 											break;
 										default:
-											Util.log(this, Log.WARN, "Unknown cursor data type=" + cursor.getType(i));
+											Util.log(this, Log.WARN, "Unknown cursor data type=" + type);
 										}
 									}
 									result.addRow(columns);
