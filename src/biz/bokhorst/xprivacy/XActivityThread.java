@@ -200,14 +200,13 @@ public class XActivityThread extends XHook {
 			Util.bug(this, ex);
 		}
 
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-			return;
-		}
-
 		// data.finish
 		try {
-			BroadcastReceiver.PendingResult pr = (BroadcastReceiver.PendingResult) param.args[0];
-			pr.finish();
+			// BroadcastReceiver.PendingResult since api-11
+			if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+				BroadcastReceiver.PendingResult pr = (BroadcastReceiver.PendingResult) param.args[0];
+				pr.finish();
+			}
 		} catch (Throwable ex) {
 			Util.bug(this, ex);
 		}
